@@ -130,30 +130,6 @@ io.on('connection', (socket) => {
     });
   })
 
-  // socket.on("set:information", data => {
-  //   informationsJSON = data;
-  //   fs.writeFile(fichierInformationsJSON, JSON.stringify(data, null, 2), 'utf8', (err) => {
-  //     if (err) {
-  //         console.error('Erreur lors de l\'écriture du fichier :', err);
-  //         return;
-  //     }
-  //     console.log('Informations sauvegardées');
-  //   });
-  // })
-
-  // socket.on("get:information", () => {
-  //   fs.readFile(fichierInformationsJSON, 'utf8', (err, data) => {
-  //     if (err) {
-  //         console.error('Erreur lors de la lecture du fichier JSON :', err);
-  //         return;
-  //     }
-  
-  //     const jsonData = JSON.parse(data);
-      
-  //     socket.emit("post:information", jsonData);
-  //   });
-  // })
-
 });
 
 // function formaterNumeroTelephone(numero) {
