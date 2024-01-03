@@ -16,8 +16,7 @@ const app = express();
 const server = http.createServer(app);
 const io = socketIo(server);
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
-const uri = "mongodb+srv://lovatinj:mongodbpassword@ecgproject.f3jwuqt.mongodb.net/?retryWrites=true&w=majority";
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 function formattedDateForDB(){
   const originalDate = new Date();
@@ -26,11 +25,11 @@ function formattedDateForDB(){
   const month = String(originalDate.getMonth() + 1).padStart(2, '0');
   const day = String(originalDate.getDate()).padStart(2, '0');
   
-  const formattedDate = `${day}/${month}/${year}`;
+  const formattedDate = `${day}-${month}-${year}`;
   return formattedDate
 }
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const uri = "mongodb+srv://lovatinj:mongodbpassword@ecgproject.f3jwuqt.mongodb.net/?retryWrites=true&w=majority";
 const clientSQL = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -54,10 +53,25 @@ run().catch(console.dir);
 
 const dbName = 'ecg';
 const db = clientSQL.db(dbName);
-const collection = db.collection('ecg_collection');
+const collectionHistory = db.collection('ecg_collection');
+const collectionInformations = db.collection('ecg_informations');
+var id_filter = "";
+var bpm = 120;
 
-function getAllDocument() {
-  return collection.find({}).toArray()
+function getAllDocument(startDate, endDate) {
+  return collectionHistory.find(
+      {"date": {
+        $gte: startDate,
+        $lte: endDate,
+      }}).toArray()
+    .then(allData => {
+      //console.log('Found documents =>', allData);
+      return allData;
+    });
+}
+
+function getAllDocumentInformations() {
+  return collectionInformations.find({}).toArray()
     .then(allData => {
       //console.log('Found documents =>', allData);
       return allData;
@@ -65,9 +79,31 @@ function getAllDocument() {
 }
 
 async function insertDocument(data){
-  const insertResult = await collection.insertMany([data]);
+  const insertResult = await collectionHistory.insertMany([data]);
   console.log('Inserted documents =>', insertResult);
 }
+
+async function insertDocumentInformations(data){
+  bpm = data.bpm;
+  const insertResult = await collectionInformations.insertMany([data]);
+  console.log('Inserted documents =>', insertResult);
+}
+
+async function updateDocumentInformations(data){
+  bpm = data.bpm;
+  const filter = { _id: new ObjectId(id_filter) };
+  const update = {
+    $set: {
+      "bpm": data.bpm,
+      "phone": data.phone,
+      "email": data.email,
+    }
+  };
+
+  collectionInformations.updateOne(filter, update);
+
+}
+
 
 // MQTT setup
 var mqtt = require('mqtt');
@@ -96,14 +132,17 @@ client.on('error', function(err) {
 
 client.on('message', function(topic, message) {
   var getDataFromTTN = JSON.parse(message);
-  var getFrmPayload = getDataFromTTN.uplink_message.decoded_payload;
-  getFrmPayload["date"] = formattedDateForDB();
-  console.log(getFrmPayload)
-
-  // Envoyé à la base Mongodb
+  if(bpm < getDataFromTTN.uplink_message.decoded_payload.hr){
+    var getFrmPayload = getDataFromTTN.uplink_message.decoded_payload;
+    getFrmPayload["date"] = formattedDateForDB();
+    console.log(getFrmPayload)
   
-  insertDocument(getFrmPayload);
-
+    // Envoyé à la base Mongodb
+  
+    insertDocument(getFrmPayload);
+  }else{
+    console.log("Bpm correct")
+  }
 });
 
 io.on('connection', (socket) => {
@@ -115,19 +154,33 @@ io.on('connection', (socket) => {
 
     getAllDocument(heures[0], heures[1])
     .then(documents => {
-      console.log(documents);
+      socket.emit("post:historique", documents);
 
-      const filteredData = documents.filter(item => {
-        const itemDate = new Date(item.date);
-        return itemDate >= heures[0] && itemDate <= heures[1];
-      });
-  
-      console.log('Résultats trouvés :', filteredData);
-
+      // Do something
     })
     .catch(error => {
       console.error('Erreur lors de la récupération des documents :', error);
     });
+  })
+
+  socket.on("set:informations", (data) => {
+    if(id_filter === ""){
+      insertDocumentInformations(data)
+    }else{
+      updateDocumentInformations(data)
+    }
+  })
+
+  socket.on("get:informations", () => {
+    getAllDocumentInformations().then(documents => {
+      if(documents.length > 0){
+        id_filter = documents[0]._id
+        bpm = documents[0].bpm
+        socket.emit("send:informations", documents[0]);
+      }else{
+        console.log("Aucun document")
+      }
+    })
   })
 
 });

@@ -18,8 +18,10 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import HistoryIcon from '@material-ui/icons/History';
+import InfoIcon from '@material-ui/icons/Info';
 
 import Historique from "./pages/historique"
+import Information from './pages/informations';
 
 const drawerWidth = 240;
 const socket = io('http://localhost:3002');
@@ -131,6 +133,12 @@ class App extends React.Component {
                     <Toolbar />
                     <div className={classes.toolbar}>
                         <List>
+                            <ListItem button component={Link} to="/info">
+                                <ListItemIcon>
+                                    < InfoIcon/>
+                                </ListItemIcon>
+                                <ListItemText primary={"Historique"} />
+                            </ListItem>
                             <ListItem button component={Link} to="/historique">
                                 <ListItemIcon>
                                     <HistoryIcon />
@@ -144,7 +152,8 @@ class App extends React.Component {
                 <main className={classes.content}>
                     <Toolbar />
                     <Switch>
-                        <Route exact path="/" render={(props) => (<Historique {...props} socket={socket}/>)} />
+                        <Route exact path="/" render={(props) => (<Information {...props} socket={socket}/>)} />
+                        <Route path="/info" render={(props) => (<Information {...props} socket={socket}/>)} />
                         <Route path="/historique" render={(props) => (<Historique {...props} socket={socket}/>)} />
                     </Switch>
                 </main>

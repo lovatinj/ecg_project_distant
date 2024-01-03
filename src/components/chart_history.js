@@ -29,7 +29,7 @@ class History extends React.Component {
     }
 
     componentDidMount() {
-        this.props.socket.on("set:data", data => {
+        this.props.socket.on("post:historique", data => {
             const tableauHr = data.map((element) => element.hr);
             const tableauTime = data.map((element) => element.date);
 

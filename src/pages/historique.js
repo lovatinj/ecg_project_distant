@@ -6,6 +6,7 @@ import TextField from '@material-ui/core/TextField';
 import { format, parse } from 'date-fns';
 import Fab from '@mui/material/Fab';
 import AddIcon from '@mui/icons-material/Add';
+import moment from "moment"
 
 import 'react-time-picker/dist/TimePicker.css';
 
@@ -75,7 +76,7 @@ class Historique extends React.Component {
   }
 
   componentDidMount = () => {
-    this.props.socket.on("set:data", data => {
+    this.props.socket.on("post:historique", data => {
       this.setState({dataHistory: data})
     })
   }
@@ -101,14 +102,6 @@ class Historique extends React.Component {
     this.setState({openDialog: false})
   }
 
-  changeDateFomrat = (originalDate) => {
-    const day = String(originalDate.getDate()).padStart(2, '0');
-    const month = String(originalDate.getMonth() + 1).padStart(2, '0');
-    const year = originalDate.getFullYear();
-    const formattedDate = `${day}-${month}-${year}`;
-    return formattedDate
-  }
-
   handleSendDialog = () => {
     this.setState({
       openDialog: false,
@@ -118,7 +111,10 @@ class Historique extends React.Component {
     const startDate = new Date(this.state.startTime["$d"])
     const endDate = new Date(this.state.endTime["$d"])
 
-    this.props.socket.emit("get:data", [this.changeDateFomrat(startDate), this.changeDateFomrat(endDate)])
+    const formattedDateStart = moment(startDate).format('DD-MM-YYYY');
+    const formattedDateEnd = moment(endDate).format('DD-MM-YYYY');
+
+    this.props.socket.emit("get:data", [formattedDateStart, formattedDateEnd])
   }
 
 
