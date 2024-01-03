@@ -43,7 +43,7 @@ export NODE_OPTIONS=--openssl-legacy-provider
 
 ## Télchargement
 
-Si vous voulez télécharger l'application en format compresser vous avez seuelement besoin de cliquer sur le bouton code puis de cliquer sur "Download ZIP" :
+Si vous voulez télécharger l'application en format compresser vous avez seulement besoin de cliquer sur le bouton code puis de cliquer sur "Download ZIP" :
 
 <p align="center">
   <img src="download.png" width="1000" title="S">
