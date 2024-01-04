@@ -8,8 +8,8 @@ const path = require('path');
 const fs = require('fs');
 const { parse, isWithinInterval } = require('date-fns');
 
-const TWILIO_SID = "AC31b7550fdecf6b39ec4134f7ba223d7e"
-const TWILIO_AUTH_TOEKN = "1743e3b5a2921b290be4e4d44335be79"
+const TWILIO_SID = ""
+const TWILIO_AUTH_TOEKN = ""
 
 const twilio = require('twilio')(TWILIO_SID, TWILIO_AUTH_TOEKN)
 const app = express();
@@ -29,7 +29,7 @@ function formattedDateForDB(){
   return formattedDate
 }
 
-const uri = "mongodb+srv://lovatinj:mongodbpassword@ecgproject.f3jwuqt.mongodb.net/?retryWrites=true&w=majority";
+const uri = "";
 const clientSQL = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -110,8 +110,8 @@ var mqtt = require('mqtt');
 var options = {
     port: 1883,
     clientId: 'mqttjs_' + Math.random().toString(16).substr(2, 8),
-    username: 'project-thibaut-jeremie@ttn',
-    password: 'NNSXS.PXDPT7PXVKKE3SIN3DCIHGNEDH6LMCKLGIGGTLA.3DFWF2KBEAITEPPWQHWNHI4A24VMUL46MZHGSQ55RR5IBRMWOYPA',
+    username: '',
+    password: '',
     keepalive: 60,
     reconnectPeriod: 1000,
     protocolId: 'MQIsdp',
@@ -123,7 +123,7 @@ var client = mqtt.connect('https://eu1.cloud.thethings.network',options);
 
 client.on('connect', function() {
   console.log('Client connected to TTN')
-  client.subscribe('v3/project-thibaut-jeremie@ttn/devices/eui-jeremie-thibaut/up')
+  client.subscribe('')
 });
 
 client.on('error', function(err) {
